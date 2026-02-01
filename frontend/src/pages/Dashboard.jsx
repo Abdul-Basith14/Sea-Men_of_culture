@@ -86,8 +86,8 @@ const Dashboard = () => {
       {/* Header */}
       <header className="h-16 glass-card border-t-0 border-l-0 border-r-0 rounded-none flex items-center justify-between px-6 sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="bg-maroon-900 w-8 h-8 rounded flex items-center justify-center font-bold text-lg border border-maroon-700/30">P</div>
-          <span className="text-xl font-bold tracking-tight">Tracker<span className="text-maroon-700">Hub</span></span>
+          <div className="bg-maroon-900 w-8 h-8 rounded flex items-center justify-center font-bold text-sm border border-maroon-700/30">SM</div>
+          <span className="text-lg font-bold tracking-tight">SEA-MEN_OF_CULTURE</span>
         </div>
         
         <div className="flex items-center gap-6">
@@ -123,12 +123,12 @@ const Dashboard = () => {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-12 w-64 glass-card border-maroon-700/30 z-50 overflow-hidden shadow-xl">
+              <div className="absolute right-0 top-12 w-64 glass-card border-maroon-700/30 z-[60] overflow-hidden shadow-2xl bg-black-900/95 backdrop-blur-xl">
                 <div className="py-2">
                   <Link 
                     to="/current-projects"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors group"
                   >
                     <CheckCircle size={18} className="text-gold-500 group-hover:text-gold-400" />
                     <div>
@@ -140,7 +140,7 @@ const Dashboard = () => {
                   <Link 
                     to="/revenue"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors group"
                   >
                     <TrendingUp size={18} className="text-success group-hover:text-success/80" />
                     <div>
@@ -152,7 +152,7 @@ const Dashboard = () => {
                   <Link 
                     to="/payment-due"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors group"
                   >
                     <AlertCircle size={18} className="text-maroon-700 group-hover:text-maroon-600" />
                     <div>

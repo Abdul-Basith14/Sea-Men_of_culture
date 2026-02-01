@@ -61,8 +61,11 @@ export const login = async (req, res) => {
       });
     }
 
+    // Normalize email to lowercase
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Check for user
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       // Check if we have less than 4 allowed users
@@ -77,8 +80,8 @@ export const login = async (req, res) => {
 
       // Create new user (first 4 are automatically allowed)
       user = await User.create({
-        name: email.split('@')[0],
-        email,
+        name: normalizedEmail.split('@')[0],
+        email: normalizedEmail,
         isAllowed: true,
         isFirstLogin: true
       });
