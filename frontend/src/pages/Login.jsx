@@ -30,10 +30,9 @@ const Login = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-lg relative z-10"
       >
         <div className="glass-card-maroon p-8 space-y-8 relative overflow-hidden">
-          {/* Animated Accent */}
           <motion.div 
             animate={{ 
               top: [-100, 100], 
@@ -43,10 +42,7 @@ const Login = () => {
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             className="absolute w-64 h-64 bg-maroon-700/20 blur-[100px] rounded-full pointer-events-none"
           />
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+          
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -54,28 +50,24 @@ const Login = () => {
             className="text-center space-y-2 relative z-10"
           >
             <h1 className="text-4xl font-bold text-white tracking-tight">
-              Business <span className="text-maroon-700">Profit</span>
+              SEA-MEN_OF_CULTURE
             </h1>
-            <p className="text-white/60">Passwordless Access for Partners</p>
-            <p className="text-xs text-white/40 italic">First 4 emails only</p>
+            <p className="text-white/60">Partnership Tracking System</p>
           </motion.div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-white/80 flex items-center gap-2">
-                <Mail size={16} /> Email Address
+                <Mail size={16} /> Access Code
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email to login"
+                placeholder="Enter your access code"
                 className="input-field"
                 required
               />
-              <p className="text-xs text-white/40 mt-1">
-                No password needed. Just enter your email.
-              </p>
             </div>
             
             <button
@@ -97,10 +89,7 @@ const Login = () => {
           
           <div className="text-center pt-4 space-y-2">
             <p className="text-sm text-white/40">
-              Secure passwordless authentication
-            </p>
-            <p className="text-xs text-maroon-700/60">
-              Limited to first 4 registered emails
+              Secure authentication system
             </p>
           </div>
         </div>
