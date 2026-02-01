@@ -85,9 +85,12 @@ export const updateUser = async (req, res) => {
 
     await user.save();
 
+    // Return user without password
+    const updatedUser = await User.findById(user._id).select('-password');
+
     res.status(200).json({
       success: true,
-      data: user
+      data: updatedUser
     });
   } catch (error) {
     res.status(500).json({
@@ -193,6 +196,41 @@ export const getProjectAnalytics = async (req, res) => {
     res.status(200).json({
       success: true,
       data: analytics
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Reset user financial data (totalProfit, payments)
+// @route   POST /api/users/:id/reset
+// @access  Private
+export const resetUserFinancials = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Reset all financial fields
+    user.totalProfit = 0;
+    user.paymentsDue = [];
+    user.paymentsReceivable = [];
+    user.pendingPaymentApprovals = [];
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'User financial data reset successfully',
+      data: user
     });
   } catch (error) {
     res.status(500).json({

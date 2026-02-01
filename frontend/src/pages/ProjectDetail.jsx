@@ -59,6 +59,17 @@ const ProjectDetail = () => {
     }
   };
 
+  const handleDeleteProject = async () => {
+    if (!window.confirm(`Are you sure you want to delete project "${project.projectName}"? This will delete all associated products and cannot be undone.`)) return;
+    try {
+      await api.delete(`/projects/${id}`);
+      toast.success('Project deleted successfully');
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error('Failed to delete project');
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-black-900">
       <AnimatedBackground />
@@ -78,7 +89,7 @@ const ProjectDetail = () => {
       <AnimatedBackground />
       
       {/* Navigation Header */}
-      <div className="h-16 flex items-center px-6 glass-card border-none rounded-none sticky top-0 z-40">
+      <div className="h-16 flex items-center justify-between px-6 glass-card border-none rounded-none sticky top-0 z-40">
         <div className="flex items-center gap-4">
           <Link to="/dashboard" className="p-2 hover:bg-white/5 rounded-full transition-colors">
             <ArrowLeft size={20} />
@@ -89,6 +100,15 @@ const ProjectDetail = () => {
             <span className="text-white font-bold">{project.projectCode}</span>
           </div>
         </div>
+        
+        <button 
+          onClick={handleDeleteProject}
+          className="flex items-center gap-2 px-4 py-2 bg-red-900/20 text-red-400 border border-red-700/30 rounded-lg hover:bg-red-700 hover:text-white transition-all text-sm font-bold"
+          title="Delete Project"
+        >
+          <Trash2 size={16} />
+          Delete Project
+        </button>
       </div>
 
       <main className="max-w-7xl mx-auto p-6 space-y-8">

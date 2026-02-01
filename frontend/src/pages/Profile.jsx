@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   User as UserIcon, Mail, Camera, Save, ArrowLeft, 
   ChevronRight, DollarSign, TrendingUp, Package, 
-  CheckCircle, AlertCircle, Loader2, CreditCard
+  CheckCircle, AlertCircle, Loader2, CreditCard, RotateCcw
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AnimatedBackground from '../components/AnimatedBackground';
@@ -46,7 +46,11 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       setFormData({ name: user.name, email: user.email });
-      setPreview(user.profileImage);
+      // Add timestamp to prevent caching of profile images
+      const imageUrl = user.profileImage.includes('?') 
+        ? user.profileImage 
+        : `${user.profileImage}?t=${Date.now()}`;
+      setPreview(imageUrl);
       fetchData();
     }
   }, [user]);
@@ -70,11 +74,25 @@ const Profile = () => {
 
     const userId = user?.id || user?._id;
     try {
-      await api.put(`/users/${userId}`, data, {
+      const response = await api.put(`/users/${userId}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success('Profile updated successfully');
+      
+      // Clear image file state
+      setImageFile(null);
+      
+      // Update preview with new image URL and cache-busting timestamp
+      if (response.data.data.profileImage) {
+        const imageUrlWithTimestamp = `${response.data.data.profileImage}?t=${Date.now()}`;
+        setPreview(imageUrlWithTimestamp);
+      }
+      
+      // Reload user data
       await loadUser();
+      
+      // Force refresh the data
+      await fetchData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Update failed');
     } finally {
@@ -101,6 +119,20 @@ const Profile = () => {
       loadUser();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
+    }
+  };
+
+  const handleResetFinancials = async () => {
+    if (!window.confirm('Are you sure you want to reset all financial data? This will clear your total profit, all payment dues, and receivables. This action cannot be undone.')) return;
+    
+    const userId = user?.id || user?._id;
+    try {
+      await api.post(`/users/${userId}/reset`);
+      toast.success('Financial data reset successfully');
+      fetchData();
+      loadUser();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Reset failed');
     }
   };
 
@@ -203,6 +235,15 @@ const Profile = () => {
                   <div className="text-xl font-bold text-blue-400">₹{financials?.revenueGenerated.toLocaleString()}</div>
                 </div>
               </div>
+              
+              <button 
+                onClick={handleResetFinancials}
+                className="w-full mt-4 px-4 py-2.5 bg-red-900/20 text-red-400 border border-red-700/30 rounded-lg hover:bg-red-700 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold"
+                title="Reset all financial data"
+              >
+                <RotateCcw size={14} />
+                Reset Financial Data
+              </button>
             </section>
           </div>
 
@@ -237,20 +278,19 @@ const Profile = () => {
             <section className="glass-card overflow-hidden">
               <div className="p-5 border-b border-white/5 flex items-center justify-between">
                 <h3 className="text-sm font-bold flex items-center gap-2 tracking-tight">
-                  <Package size={18} className="text-maroon-700" /> Operational Portfolio
+                  <Package size={18} className="text-maroon-700" /> My Projects
                 </h3>
-                <span className="text-[10px] font-bold text-white/40">{projectStats.length} Project Enlisted</span>
+                <span className="text-[10px] font-bold text-white/40">{projectStats.length} Total</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="bg-white/5 text-[10px] uppercase font-bold tracking-widest text-white/30">
-                      <th className="px-6 py-4">ID</th>
+                      <th className="px-6 py-4">Project</th>
+                      <th className="px-6 py-4">My Revenue</th>
+                      <th className="px-6 py-4">My Profit</th>
+                      <th className="px-6 py-4">Items Sold</th>
                       <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4">Individual Impact</th>
-                      <th className="px-6 py-4">Project Total</th>
-                      <th className="px-6 py-4">Net Profit</th>
-                      <th className="px-6 py-4">Units (S/R/T)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -258,26 +298,22 @@ const Profile = () => {
                       <tr key={proj._id} className="hover:bg-white/5 transition-colors group cursor-pointer" onClick={() => navigate(`/project/${proj._id}`)}>
                         <td className="px-6 py-4">
                           <div className="font-bold text-maroon-700 group-hover:text-white transition-colors">#{proj.projectCode}</div>
-                          <div className="text-[10px] text-white/40 truncate max-w-[120px]">{proj.projectName}</div>
+                          <div className="text-[10px] text-white/40 truncate max-w-[150px]">{proj.projectName}</div>
+                        </td>
+                        <td className="px-6 py-4 font-bold text-blue-400">₹{proj.userRevenue.toLocaleString()}</td>
+                        <td className="px-6 py-4 font-bold text-success">₹{proj.userProfit.toLocaleString()}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1">
+                            <span className="text-white font-bold">{proj.productsSold}</span>
+                            <span className="text-white/40 text-xs">of {proj.totalProducts}</span>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase ${
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                             proj.status === 'completed' ? 'bg-success/10 text-success border border-success/30' : 'bg-maroon-900/20 text-maroon-700 border border-maroon-700/30'
                           }`}>
                             {proj.status}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 font-bold text-blue-400">₹{proj.userRevenue.toLocaleString()}</td>
-                        <td className="px-6 py-4 font-bold text-white/60 text-[11px]">₹{proj.totalProjectRevenue.toLocaleString()}</td>
-                        <td className="px-6 py-4 font-bold text-success">₹{proj.userProfit.toLocaleString()}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-white font-bold">{proj.productsSold}</span>
-                            <span className="text-white/20">/</span>
-                            <span className="text-white/40">{proj.productsRemaining}</span>
-                            <span className="text-white/20">/</span>
-                            <span className="text-white/20">{proj.totalProducts}</span>
-                          </div>
                         </td>
                       </tr>
                     ))}

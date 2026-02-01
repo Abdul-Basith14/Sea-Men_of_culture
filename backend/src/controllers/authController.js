@@ -46,38 +46,46 @@ export const register = async (req, res) => {
   }
 };
 
-// @desc    Login user
+// @desc    Login user (passwordless - only first 4 emails allowed)
 // @route   POST /api/auth/login
 // @access  Public
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
 
-    // Validate email & password
-    if (!email || !password) {
+    // Validate email
+    if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: 'Please provide email'
       });
     }
 
-    // Check for user (include password field)
-    const user = await User.findOne({ email }).select('+password');
+    // Check for user
+    let user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
+      // Check if we have less than 4 allowed users
+      const allowedCount = await User.countDocuments({ isAllowed: true });
+      
+      if (allowedCount >= 4) {
+        return res.status(403).json({
+          success: false,
+          message: 'Maximum number of users reached. Only the first 4 registered emails are allowed.'
+        });
+      }
+
+      // Create new user (first 4 are automatically allowed)
+      user = await User.create({
+        name: email.split('@')[0],
+        email,
+        isAllowed: true,
+        isFirstLogin: true
       });
-    }
-
-    // Check if password matches
-    const isMatch = await user.comparePassword(password);
-
-    if (!isMatch) {
-      return res.status(401).json({
+    } else if (!user.isAllowed) {
+      return res.status(403).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Access denied. Only the first 4 registered emails are allowed.'
       });
     }
 
@@ -93,7 +101,8 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         profileImage: user.profileImage,
-        isFirstLogin: user.isFirstLogin
+        isFirstLogin: user.isFirstLogin,
+        isAllowed: user.isAllowed
       }
     });
   } catch (error) {

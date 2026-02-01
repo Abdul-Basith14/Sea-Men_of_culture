@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, Bell, Search, Plus, Filter, User as UserIcon, RefreshCw, History, ArrowRight, Menu, X, CheckCircle, TrendingUp, AlertCircle } from 'lucide-react';
 import AnimatedBackground from '../components/AnimatedBackground';
@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   
   const fetchMembers = async () => {
     setLoading(true);
@@ -30,6 +31,23 @@ const Dashboard = () => {
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
 
   const handleMemberAction = async (type, data) => {
     try {
@@ -95,7 +113,7 @@ const Dashboard = () => {
           </Link>
 
           {/* Hamburger Menu */}
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button 
               onClick={() => setMenuOpen(!menuOpen)}
               className="p-2 hover:bg-white/5 rounded-lg text-white/60 hover:text-white transition-all"
@@ -105,7 +123,7 @@ const Dashboard = () => {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-12 w-64 glass-card border-maroon-700/30 z-50 overflow-hidden">
+              <div className="absolute right-0 top-12 w-64 glass-card border-maroon-700/30 z-50 overflow-hidden shadow-xl">
                 <div className="py-2">
                   <Link 
                     to="/current-projects"

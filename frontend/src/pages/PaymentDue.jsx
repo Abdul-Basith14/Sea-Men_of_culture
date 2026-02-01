@@ -20,7 +20,7 @@ const PaymentDue = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/projects', { params: { status: 'active' } });
+      const res = await api.get('/projects');
       setProjects(res.data.data);
     } catch (error) {
       toast.error('Failed to load projects');

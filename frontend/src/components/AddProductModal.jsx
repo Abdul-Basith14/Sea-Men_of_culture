@@ -126,10 +126,9 @@ const AddProductModal = ({ isOpen, onClose, projectId, onRefresh }) => {
           </label>
           <select 
             className="input-field py-2"
-            value={formData.status || 'not_sold'}
+            value={formData.status || 'in_process'}
             onChange={(e) => setFormData({...formData, status: e.target.value})}
           >
-            <option value="not_sold">Not Sold (Inventory)</option>
             <option value="in_process">In Process</option>
           </select>
         </div>
